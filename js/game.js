@@ -26,7 +26,7 @@
     })() }],
     objects: [], goal: null, cap: null
   };
-  const DEMO_ROWS = ['.BB..', 'WSWEE', 'P...P', 'O...O'];
+  const DEMO_ROWS = ['WSWEE', 'P...P', 'O...O'];
   const ROWMAP = { S: 'seat', W: 'wood', E: 'engine', P: 'spring', O: 'wheel', B: 'balloon', N: 'wing' };
 
   function rowsDesign(rows) {
@@ -799,7 +799,7 @@
     const R = G.R;
     const zoom = U.clamp(Math.min(R.W / 30, R.H / 17), 16, 50);
     R.cam.zoom += (zoom - R.cam.zoom) * 0.1;
-    const tx = f.x + 3, ty = f.y + R.H * 0.31 / R.cam.zoom;
+    const tx = f.x + 3, ty = f.y + R.H * 0.33 / R.cam.zoom;
     R.cam.x += (tx - R.cam.x) * Math.min(1, dt * 3);
     R.cam.y += (ty - R.cam.y) * Math.min(1, dt * 3);
   }
@@ -807,7 +807,11 @@
   function update(dt) {
     const R = G.R;
     if (G.state === 'title') updateDemo(dt);
-    else if (G.state === 'levels') { R.cam.x += dt * 1.2; }
+    else if (G.state === 'levels' && G.bgL) {
+      const b = G.bgL.bounds;
+      const span = Math.max(4, b.maxX - b.minX - 30);
+      R.cam.x = b.minX + 15 + (Math.sin(G.t * 0.05) * 0.5 + 0.5) * span;
+    }
     else if (G.state === 'build') {
       const k = Math.min(1, dt * 6);
       R.cam.x += (G.cam.x - R.cam.x) * k;
@@ -862,6 +866,7 @@
     const now = ts / 1000;
     const dt = Math.min(0.05, Math.max(0, now - (G.last || now)));
     G.last = now;
+    if (JJ.Admin && JJ.Admin.isOpen && JJ.Admin.isOpen()) { requestAnimationFrame(frame); return; }
     G.t += dt;
     try {
       update(dt);
