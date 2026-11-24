@@ -220,7 +220,6 @@
     m.innerHTML =
       '<div class="adm-head"><div><h2>Dashboard</h2><p>How Junkyard Joyride is going on this device.</p></div>' +
       '<div class="adm-actions"><button class="abtn g" data-a="play" type="button"><span data-icon="play"></span>Play the game</button></div></div>' +
-      (Store.usingDefaultPass() ? '<div class="adm-warn"><span data-icon="shield"></span><p><b>You are still using the default passcode.</b> Anyone who knows it can open this panel. Pick your own in Settings.</p></div>' : '') +
       '<div class="adm-grid">' +
       stat('Stars collected', stars + '<small style="font-size:0.5em;color:#a7afbd"> / ' + L.length * 3 + '</small>', bar(stars / (L.length * 3)), true) +
       stat('Levels beaten', done + '<small style="font-size:0.5em;color:#a7afbd"> / ' + L.length + '</small>', bar(done / L.length), true) +
@@ -491,12 +490,12 @@
       '<div class="adm-head"><div><h2>Settings</h2><p>Passcode, title message and save data.</p></div></div>' +
       '<div class="adm-cols">' +
       '<div class="adm-card"><h3>Admin passcode</h3>' +
-      '<p class="sub">' + (Store.usingDefaultPass() ? 'You are using the default passcode (<b>junkyard</b>).' : 'You have a custom passcode.') + '</p>' +
+      '<p class="sub">The passcode is saved (scrambled) in <b>js/config.js</b>, so it is the same on every device.</p>' +
       '<div class="ed-field"><label for="pc-1">New passcode</label><input type="password" id="pc-1" autocomplete="new-password"></div>' +
       '<div class="ed-field" style="margin-top:8px"><label for="pc-2">Type it again</label><input type="password" id="pc-2" autocomplete="new-password"></div>' +
       '<p class="adm-err" id="pc-err"></p>' +
-      '<div class="adm-actions"><button class="abtn y" data-a="local" type="button">Use on this device</button><button class="abtn" data-a="site" type="button">Make site code</button></div>' +
-      '<p class="sub" style="margin-top:10px">"Use on this device" changes it in this browser. "Make site code" gives you a line to paste into <b>js/config.js</b> so it changes for your whole website. It is a fun lock for a static site, not bank security.</p></div>' +
+      '<div class="adm-actions"><button class="abtn y" data-a="site" type="button">Make site code</button></div>' +
+      '<p class="sub" style="margin-top:10px">"Make site code" gives you a line to paste into <b>js/config.js</b>. Commit it and the new passcode works on your whole website. It is a fun lock for a static site, not bank security.</p></div>' +
       '<div class="adm-card"><h3>Title screen message</h3><p class="sub">Shows a note on the title screen of this device.</p>' +
       '<div class="ed-field"><label for="motd">Message</label><input type="text" id="motd" maxlength="120" value="' + esc(Store.admin.motd || '') + '" placeholder="New levels every Friday!"></div>' +
       '<div class="adm-actions" style="margin-top:10px"><button class="abtn y" data-a="motd" type="button">Save message</button></div>' +
@@ -514,11 +513,6 @@
       if (a !== b) { err.textContent = 'The two passcodes do not match.'; return null; }
       err.textContent = '';
       return a.trim();
-    };
-    m.querySelector('[data-a=local]').onclick = () => {
-      const code = read(); if (!code) return;
-      Store.admin.passHash = U.hash(code); Store.save('admin');
-      toast('Passcode changed on this device'); ADM.go('settings');
     };
     m.querySelector('[data-a=site]').onclick = () => {
       const code = read(); if (!code) return;

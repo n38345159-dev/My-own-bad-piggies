@@ -491,6 +491,14 @@ input, select, textarea { font: inherit; }
   .hint { display: none; }
   .objectives { display: none; }
   .levels-panel { top: calc(120px + var(--safe-t)); }
+  .title-wrap { gap: 8px; margin-top: 0; }
+  .logo-1 { font-size: clamp(1.9rem, 6vw, 3.2rem); }
+  .logo-2 { font-size: clamp(2.4rem, 8vw, 4.2rem); }
+  .logo span { -webkit-text-stroke-width: 5px; text-shadow: 0 6px 0 var(--ink); }
+  .tagline { margin: 0; }
+  .title-buttons { gap: 10px; }
+  .btn-xl { font-size: 1.4rem; }
+  .title-foot { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

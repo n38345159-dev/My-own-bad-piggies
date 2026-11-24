@@ -59,9 +59,7 @@ The admin panel is at `https://<your-username>.github.io/<repo-name>/admin.html`
 
 ![Level editor](docs/editor.png)
 
-- **Default passcode: `junkyard`.** Change it! Go to **Admin > Settings**, type a new passcode and:
-  - **Use on this device** changes it in that browser only.
-  - **Make site code** gives you a line like `adminPassHash: '...'`. Paste it over the `adminPassHash` line in `js/config.js` and commit. Now the new passcode works on your whole site.
+- **Passcode: `2001`.** To change it, go to **Admin > Settings**, type a new passcode and press **Make site code**. It gives you a line like `adminPassHash: '...'`. Paste it over the `adminPassHash` line in `js/config.js` and commit. The new passcode then works on your whole site.
 - **Dashboard**: stars, levels beaten, runs, wins, explosions, balloons popped, play time.
 - **Cheats**: god mode, unlimited parts, infinite fuel, unlock all levels, super grip, bouncy castle, big-head Rocco, rainbow trail, physics X-ray, and sliders for gravity, game speed, engine power, rocket power and balloon lift.
 - **Progress**: tick boxes to set which levels are beaten and which stars are collected.

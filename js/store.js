@@ -59,8 +59,8 @@
     resetCheats() { this.cheats = Object.assign({}, CHEAT_DEFAULTS); this.save('cheats'); },
 
     isAdmin() { return this.admin.sessionUntil > Date.now(); },
-    adminHash() { return this.admin.passHash || (window.JJ_CONFIG && window.JJ_CONFIG.adminPassHash) || JJ.U.hash('junkyard'); },
-    usingDefaultPass() { return this.adminHash() === JJ.U.hash('junkyard'); },
+    // The passcode comes from js/config.js only, so it is the same on every device.
+    adminHash() { return (window.JJ_CONFIG && window.JJ_CONFIG.adminPassHash) || JJ.U.hash('2001'); },
     login(code) {
       if (JJ.U.hash(String(code).trim()) !== this.adminHash()) return false;
       this.admin.sessionUntil = Date.now() + 12 * 3600 * 1000;

@@ -15,18 +15,25 @@
   };
 
   // ------------------------------------------------------------------ demo
+  // A long course for the title-screen car: flat where it starts (so every wheel
+  // begins on the ground), then gentle hills that fade in.
   const DEMO = {
     id: 'demo', theme: 'hills',
-    build: { x: 0, y: 0.6, w: 5, h: 4 },
+    build: { x: 0, y: 0.05, w: 5, h: 3 },
     terrain: [{ pts: (function () {
-      const p = [[-30, 14], [-28, 0]];
-      for (let x = -20; x <= 420; x += 4) p.push([x, +(Math.sin(x * 0.09) * 1.2 + Math.sin(x * 0.031) * 2.2 + 2.2).toFixed(2)]);
+      const p = [[-40, 14], [-38, 0], [14, 0]];
+      for (let x = 18; x <= 420; x += 3) {
+        const fade = Math.min(1, (x - 14) / 40);
+        p.push([x, +((Math.sin((x - 14) * 0.09) * 1.0 + Math.sin((x - 14) * 0.031) * 1.8) * fade).toFixed(2)]);
+      }
       p.push([428, 14]);
       return p;
     })() }],
     objects: [], goal: null, cap: null
   };
   const DEMO_ROWS = ['WSWEE', 'P...P', 'O...O'];
+  // the demo car's outline around Rocco's seat, in metres (head on top, wheels below)
+  const DEMO_BOX = { l: -1.5, r: 3.5, b: -2.5, t: 1.1 };
   const ROWMAP = { S: 'seat', W: 'wood', E: 'engine', P: 'spring', O: 'wheel', B: 'balloon', N: 'wing' };
 
   function rowsDesign(rows) {
@@ -36,15 +43,59 @@
   }
 
   function startDemo() {
-    const def = U.clone(DEMO);
-    const x0 = 0, y0 = 1.2 * Math.sin(0) + 2.2 * Math.sin(0) + 2.2 + 0.05;
-    def.build.x = x0; def.build.y = y0;
-    G.demoL = JJ.Level.compile(def);
+    G.demoL = JJ.Level.compile(U.clone(DEMO));
     G.demo = new JJ.Sim(G.demoL, rowsDesign(DEMO_ROWS), {});
     G.demo.toggleGroup('engine:0');
     G.demoBest = 0; G.demoStuck = 0;
-    const f = G.demo.focus();
-    G.R.cam.x = f.x; G.R.cam.y = f.y;
+    G.demoSpot = null;
+    demoCamera(0, true);
+  }
+
+  // Where on screen the demo car drives so it never covers the menu:
+  // beside the logo and buttons on wide screens, underneath them on tall ones.
+  function demoSpot() {
+    const R = G.R, W = R.W, H = R.H;
+    const s = G.demoSpot;
+    if (s && G.t - s.at < 0.5 && s.W === W && s.H === H) return s;
+    const cr = R.canvas.getBoundingClientRect();
+    const box = (sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      if (!r.width && !r.height) return null;
+      return { l: r.left - cr.left, r: r.right - cr.left, t: r.top - cr.top, b: r.bottom - cr.top };
+    };
+    const ui = box('#scr-title .title-wrap') || { l: W * 0.3, r: W * 0.7, t: H * 0.1, b: H * 0.75 };
+    const foot = box('#scr-title .title-foot');
+    const floor = Math.min(H - 10, foot ? foot.t - 6 : H - 40);
+    const carW = DEMO_BOX.r - DEMO_BOX.l, carH = DEMO_BOX.t - DEMO_BOX.b;
+    // under the menu, centred
+    const band = floor - (ui.b + 12);
+    const zUnder = Math.min((W * 0.55) / carW, band / carH, 60);
+    // left of the menu, near the bottom
+    const side = ui.l - 24;
+    const zSide = Math.min((side * 0.85) / carW, ((floor - 20) * 0.5) / carH, 60);
+    let spot;
+    if (zUnder >= zSide && zUnder > 0) spot = { zoom: Math.max(8, zUnder), x: W / 2, y: ui.b + 12 + band / 2 };
+    else if (zSide > 0) {
+      const z = Math.max(8, zSide);
+      spot = { zoom: z, x: Math.max(12 + (carW * z) / 2, side / 2), y: floor - (carH * z) / 2 };
+    } else spot = { zoom: 10, x: W * 0.18, y: H - 60 };
+    spot.at = G.t; spot.W = W; spot.H = H;
+    G.demoSpot = spot;
+    return spot;
+  }
+
+  function demoCamera(dt, snap) {
+    const R = G.R, f = G.demo.focus(), s = demoSpot();
+    R.cam.zoom += (s.zoom - R.cam.zoom) * (snap ? 1 : Math.min(1, dt * 3));
+    const z = R.cam.zoom;
+    const cx = f.x + (DEMO_BOX.l + DEMO_BOX.r) / 2, cy = f.y + (DEMO_BOX.b + DEMO_BOX.t) / 2;
+    // lead by the car's speed so the smoothed camera does not lag behind it
+    const v = G.demo.seatVel();
+    const tx = cx - (s.x - R.W / 2) / z + (snap ? 0 : v.x / 5), ty = cy + (s.y - R.H / 2) / z + (snap ? 0 : v.y / 10);
+    R.cam.x += (tx - R.cam.x) * (snap ? 1 : Math.min(1, dt * 5));
+    R.cam.y += (ty - R.cam.y) * (snap ? 1 : Math.min(1, dt * 10));
   }
 
   // ---------------------------------------------------------------- screens
@@ -796,12 +847,7 @@
     const f = sim.focus();
     if (f.x > G.demoBest + 0.5) { G.demoBest = f.x; G.demoStuck = 0; } else G.demoStuck += dt;
     if (f.x > 380 || G.demoStuck > 4 || sim.status.fell) { startDemo(); return; }
-    const R = G.R;
-    const zoom = U.clamp(Math.min(R.W / 30, R.H / 17), 16, 50);
-    R.cam.zoom += (zoom - R.cam.zoom) * 0.1;
-    const tx = f.x + 3, ty = f.y + R.H * 0.33 / R.cam.zoom;
-    R.cam.x += (tx - R.cam.x) * Math.min(1, dt * 3);
-    R.cam.y += (ty - R.cam.y) * Math.min(1, dt * 3);
+    demoCamera(dt, false);
   }
 
   function update(dt) {
