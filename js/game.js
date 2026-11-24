@@ -67,10 +67,11 @@
     };
     const ui = box('#scr-title .title-wrap') || { l: W * 0.3, r: W * 0.7, t: H * 0.1, b: H * 0.75 };
     const foot = box('#scr-title .title-foot');
+    const admin = box('#btn-admin');
     const floor = Math.min(H - 10, foot ? foot.t - 6 : H - 40);
     const carW = DEMO_BOX.r - DEMO_BOX.l, carH = DEMO_BOX.t - DEMO_BOX.b;
-    // under the menu, centred
-    const band = floor - (ui.b + 12);
+    // under the menu, centred (and above the Admin corner button)
+    const band = Math.min(floor, admin ? admin.t - 8 : floor) - (ui.b + 12);
     const zUnder = Math.min((W * 0.55) / carW, band / carH, 60);
     // left of the menu, near the bottom
     const side = ui.l - 24;
@@ -79,7 +80,7 @@
     if (zUnder >= zSide && zUnder > 0) spot = { zoom: Math.max(8, zUnder), x: W / 2, y: ui.b + 12 + band / 2 };
     else if (zSide > 0) {
       const z = Math.max(8, zSide);
-      spot = { zoom: z, x: Math.max(12 + (carW * z) / 2, side / 2), y: floor - (carH * z) / 2 };
+      spot = { zoom: z, x: Math.max(24 + (carW * z) / 2, side / 2), y: floor - (carH * z) / 2 };
     } else spot = { zoom: 10, x: W * 0.18, y: H - 60 };
     spot.at = G.t; spot.W = W; spot.H = H;
     G.demoSpot = spot;
