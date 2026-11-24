@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Junkyard Joyride</title>
+<meta name="description" content="Build wacky contraptions out of junk and get Rocco the raccoon to the snack stash.">
+<meta name="theme-color" content="#2b2f38">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='14' width='52' height='30' rx='8' fill='%23ffcf3f' stroke='%232a1d14' stroke-width='5'/%3E%3Ccircle cx='18' cy='48' r='10' fill='%2334333c' stroke='%232a1d14' stroke-width='4'/%3E%3Ccircle cx='46' cy='48' r='10' fill='%2334333c' stroke='%232a1d14' stroke-width='4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<canvas id="cv" aria-label="Game view"></canvas>
+
+<div id="hud">
+  <!-- TITLE -->
+  <section class="screen" id="scr-title" hidden>
+    <div class="title-wrap">
+      <h1 class="logo" aria-label="Junkyard Joyride">
+        <span class="logo-1">Junkyard</span>
+        <span class="logo-2">Joyride</span>
+      </h1>
+      <p class="tagline">Build it. Drive it. Wreck it.</p>
+      <div class="motd" id="motd" hidden></div>
+      <div class="title-buttons">
+        <button class="btn btn-green btn-xl" id="btn-play" type="button"><span data-icon="play"></span>Play</button>
+        <div class="row">
+          <button class="btn btn-teal" id="btn-sandbox" type="button"><span data-icon="wrench"></span>Sandbox</button>
+          <button class="btn" id="btn-settings" type="button"><span data-icon="gear"></span>Settings</button>
+        </div>
+      </div>
+    </div>
+    <button class="corner-btn" id="btn-admin" type="button" title="Admin panel"><span data-icon="shield"></span><span class="corner-label">Admin</span></button>
+    <div class="title-foot">A physics junk-building game starring Rocco the raccoon</div>
+  </section>
+
+  <!-- LEVEL SELECT -->
+  <section class="screen" id="scr-levels" hidden>
+    <div class="topbar">
+      <button class="icon-btn" id="lv-back" type="button" title="Back"><span data-icon="back"></span></button>
+      <h2 class="screen-title">Pick a level</h2>
+      <div class="star-total"><span data-icon="star"></span><span id="star-total">0</span></div>
+    </div>
+    <div class="world-tabs" id="world-tabs" role="tablist"></div>
+    <div class="levels-panel plate">
+      <div class="world-head"><h3 id="world-name">World</h3><p id="world-blurb"></p></div>
+      <div class="level-grid" id="level-grid"></div>
+    </div>
+  </section>
+
+  <!-- BUILD -->
+  <section class="screen" id="scr-build" hidden>
+    <div class="topbar">
+      <button class="icon-btn" id="bd-back" type="button" title="Levels"><span data-icon="back"></span></button>
+      <div class="level-chip"><span class="lv-num" id="bd-num">1-1</span><span class="lv-name" id="bd-name">Level</span></div>
+      <div class="spacer"></div>
+      <button class="icon-btn" id="bd-view" type="button" title="Look at the whole level"><span data-icon="eye"></span></button>
+      <button class="icon-btn admin-only" id="bd-admin" type="button" title="Admin tools" hidden><span data-icon="shield"></span></button>
+      <button class="icon-btn" id="bd-pause" type="button" title="Menu"><span data-icon="pause"></span></button>
+    </div>
+    <div class="objectives plate" id="bd-objectives"></div>
+    <div class="hint" id="bd-hint">
+      <canvas class="hint-face" width="88" height="88"></canvas>
+      <p id="bd-hint-text"></p>
+      <button class="hint-close" id="bd-hint-close" type="button" title="Hide tip">&times;</button>
+    </div>
+    <div class="cheat-badge" id="bd-cheats" hidden>CHEATS ON</div>
+    <div class="build-dock">
+      <div class="part-info" id="part-info"></div>
+      <div class="dock-row">
+        <div class="toolbar plate" id="toolbar" role="toolbar" aria-label="Parts"></div>
+        <div class="dock-actions">
+          <button class="icon-btn" id="bd-undo" type="button" title="Undo (Ctrl+Z)"><span data-icon="undo"></span></button>
+          <button class="icon-btn" id="bd-clear" type="button" title="Clear all"><span data-icon="trash"></span></button>
+          <button class="btn btn-green btn-go" id="bd-go" type="button"><span data-icon="play"></span>Go!</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLAY -->
+  <section class="screen" id="scr-play" hidden>
+    <div class="topbar">
+      <button class="icon-btn" id="pl-build" type="button" title="Back to building (B)"><span data-icon="wrench"></span></button>
+      <button class="icon-btn" id="pl-restart" type="button" title="Try again (R)"><span data-icon="restart"></span></button>
+      <div class="spacer"></div>
+      <div class="play-status plate">
+        <span class="timer" id="pl-timer">0.00s</span>
+        <span class="cap-ind" id="pl-cap" title="Bottle cap"></span>
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn admin-only" id="pl-admin" type="button" title="Admin tools" hidden><span data-icon="shield"></span></button>
+      <button class="icon-btn" id="pl-pause" type="button" title="Menu (P)"><span data-icon="pause"></span></button>
+    </div>
+    <div class="cheat-badge" id="pl-cheats" hidden>CHEATS ON</div>
+    <div class="play-msg" id="pl-msg" hidden></div>
+    <div class="controls" id="controls"></div>
+  </section>
+
+  <div id="toasts" aria-live="polite"></div>
+  <div id="modal" class="modal-back" hidden></div>
+  <div id="quick" class="quick plate" hidden></div>
+</div>
+
+<!-- ADMIN -->
+<section id="admin" hidden></section>
+
+<script src="js/lib/planck.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/store.js"></script>
+<script src="js/parts.js"></script>
+<script src="js/level.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/site-levels.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/art.js"></script>
+<script src="js/render.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
